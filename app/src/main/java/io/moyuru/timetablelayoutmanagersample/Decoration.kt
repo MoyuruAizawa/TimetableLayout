@@ -12,8 +12,8 @@ import org.threeten.bp.format.DateTimeFormatter
 
 class Decoration(
   private val periods: List<Period>,
-  private val pxPerMin: Int,
   private val columnWidth: Int,
+  private val pxPerMin: Int,
   private val stageNameHeight: Int,
   private val timeWidth: Int
 ) : RecyclerView.ItemDecoration() {
