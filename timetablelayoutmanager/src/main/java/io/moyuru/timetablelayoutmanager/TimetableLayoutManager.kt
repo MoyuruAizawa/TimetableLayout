@@ -275,18 +275,18 @@ class TimetableLayoutManager(
     }
   }
 
-  private fun relayoutChildren(startX: Int, startY: Int, topPeriod: Period, recycler: Recycler) {
+  private fun relayoutChildren(startX: Int, startY: Int, firstPeriod: Period, recycler: Recycler) {
     var offsetX = startX
-    anchor.leftColumn = topPeriod.columnNumber
+    anchor.leftColumn = firstPeriod.columnNumber
     val columnCount = columns.size()
-    val indexOfFirstColumn = columns.indexOfKey(topPeriod.columnNumber)
+    val indexOfFirstColumn = columns.indexOfKey(firstPeriod.columnNumber)
     val range = (indexOfFirstColumn until columnCount)
       .plus(if (shouldLoopHorizontally && indexOfFirstColumn > 0) (0 until indexOfFirstColumn) else emptyList())
     anchor.rightColumn = columns.keyAt(requireNotNull(range.last()))
     range.forEach {
       val columnNumber = columns.keyAt(it)
-      val startPositionInColumn = calculateStartPeriodInColumn(columnNumber, startY, topPeriod) ?: return@forEach
-      val offsetY = startY + (startPositionInColumn.startUnixMin - topPeriod.startUnixMin) * pxPerMinute
+      val startPositionInColumn = calculateStartPeriodInColumn(columnNumber, startY, firstPeriod) ?: return@forEach
+      val offsetY = startY + (startPositionInColumn.startUnixMin - firstPeriod.startUnixMin) * pxPerMinute
       offsetX +=
         fillColumnHorizontally(columnNumber, startPositionInColumn.positionInColumn, offsetX, offsetY, true, recycler)
 
