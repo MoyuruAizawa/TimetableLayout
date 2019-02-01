@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView.NO_POSITION
 import androidx.recyclerview.widget.RecyclerView.Recycler
 import androidx.recyclerview.widget.RecyclerView.State
 import java.util.concurrent.TimeUnit
+import kotlin.math.absoluteValue
 import kotlin.math.max
 import kotlin.math.min
 
@@ -155,12 +156,13 @@ class TimetableLayoutManager(
     if (dy == 0) return 0
 
     val scrollAmount = calculateVerticallyScrollAmount(dy)
+    offsetChildrenVertical(-scrollAmount)
     if (scrollAmount > 0) {
       // recycle
       anchor.top.forEach { columnNum, position ->
         val view = findViewByPosition(position) ?: return@forEach
         val bottom = getDecoratedBottom(view)
-        if (bottom - scrollAmount < parentTop) {
+        if (bottom < parentTop) {
           val period = periods.getOrNull(position) ?: return@forEach
           val nextPeriod = columns.get(columnNum).getOrNull(period.positionInColumn + 1) ?: return@forEach
           removeAndRecycleView(view, recycler)
@@ -171,12 +173,11 @@ class TimetableLayoutManager(
       anchor.bottom.forEach { columnNum, position ->
         val view = findViewByPosition(position) ?: return@forEach
         val bottom = getDecoratedBottom(view)
-        if (bottom - scrollAmount < parentBottom) {
+        if (bottom < parentBottom) {
           val left = getDecoratedLeft(view)
           val period = periods.getOrNull(position) ?: return@forEach
           val nextPeriod = columns.get(columnNum).getOrNull(period.positionInColumn + 1) ?: return@forEach
-          addPeriod(nextPeriod, Direction.BOTTOM, left, bottom, recycler)
-          anchor.bottom.put(columnNum, nextPeriod.adapterPosition)
+          fillColumnVertically(nextPeriod, left, bottom, true, recycler)
         }
       }
     } else {
@@ -184,7 +185,7 @@ class TimetableLayoutManager(
       anchor.bottom.forEach { columnNum, position ->
         val view = findViewByPosition(position) ?: return@forEach
         val top = getDecoratedTop(view)
-        if (top - scrollAmount > parentBottom) {
+        if (top > parentBottom) {
           val period = periods.getOrNull(position) ?: return@forEach
           val nextPeriod = columns.get(columnNum).getOrNull(period.positionInColumn - 1) ?: return@forEach
           removeAndRecycleView(view, recycler)
@@ -195,17 +196,14 @@ class TimetableLayoutManager(
       anchor.top.forEach { columnNum, position ->
         val view = findViewByPosition(position) ?: return@forEach
         val top = getDecoratedTop(view)
-        if (top - scrollAmount > parentTop) {
+        if (top > parentTop) {
           val left = getDecoratedLeft(view)
           val period = periods.getOrNull(position) ?: return@forEach
           val nextPeriod = columns.get(columnNum).getOrNull(period.positionInColumn - 1) ?: return@forEach
-          addPeriod(nextPeriod, Direction.TOP, left, top, recycler)
-          anchor.top.put(columnNum, nextPeriod.adapterPosition)
+          fillColumnVertically(nextPeriod, left, top, false, recycler)
         }
       }
     }
-
-    offsetChildrenVertical(-scrollAmount)
     return scrollAmount
   }
 
@@ -345,6 +343,33 @@ class TimetableLayoutManager(
     val bottom = top + height
     layoutDecorated(view, left, top, right, bottom)
     return width to height
+  }
+
+  private fun fillColumnVertically(
+    startPeriod: Period,
+    offsetX: Int,
+    startY: Int,
+    isAppend: Boolean,
+    recycler: Recycler
+  ): Int {
+    val column = columns.get(startPeriod.columnNumber) ?: return 0
+    val direction = if (isAppend) Direction.BOTTOM else Direction.TOP
+    var offsetY = startY
+    val range = if (isAppend) startPeriod.positionInColumn until column.size else startPeriod.positionInColumn downTo 0
+    for (i in range) {
+      val period = column[i]
+      val (_, height) = addPeriod(period, direction, offsetX, offsetY, recycler)
+      if (isAppend) {
+        anchor.bottom.put(period.columnNumber, period.adapterPosition)
+        offsetY += height
+        if (offsetY > parentBottom) return offsetY - startY
+      } else {
+        anchor.top.put(period.columnNumber, period.adapterPosition)
+        offsetY -= height
+        if (offsetY < parentTop) return startY - offsetY
+      }
+    }
+    return (offsetY - startY).absoluteValue
   }
 
   private fun fillColumnHorizontally(
