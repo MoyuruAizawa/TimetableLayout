@@ -230,18 +230,10 @@ class TimetableLayoutManager(
         val topView = findTopView() ?: return 0
         val topPeriod = periods[topView.adapterPosition]
         val startPeriodInColumn =
-          calculateStartPeriodInColumn(nextColumnNum, getDecoratedTop(topView), topPeriod)
-            ?: return 0
+          calculateStartPeriodInColumn(nextColumnNum, getDecoratedTop(topView), topPeriod) ?: return 0
         val offsetY = getDecoratedTop(topView) +
             (startPeriodInColumn.startUnixMin - topPeriod.startUnixMin) * pxPerMinute
-        fillColumnHorizontally(
-          nextColumnNum,
-          startPeriodInColumn.positionInColumn,
-          right,
-          offsetY,
-          true,
-          recycler
-        )
+        fillColumnHorizontally(nextColumnNum, startPeriodInColumn.positionInColumn, right, offsetY, true, recycler)
         anchor.rightColumn = nextColumnNum
       }
     } else {
@@ -257,21 +249,10 @@ class TimetableLayoutManager(
         val topView = findTopView() ?: return 0
         val topPeriod = periods[topView.adapterPosition]
         val startPeriodInColumn =
-          calculateStartPeriodInColumn(
-            previousColumn,
-            getDecoratedTop(topView),
-            topPeriod
-          ) ?: return 0
+          calculateStartPeriodInColumn(previousColumn, getDecoratedTop(topView), topPeriod) ?: return 0
         val offsetY = getDecoratedTop(topView) +
             (startPeriodInColumn.startUnixMin - topPeriod.startUnixMin) * pxPerMinute
-        fillColumnHorizontally(
-          previousColumn,
-          startPeriodInColumn.positionInColumn,
-          left,
-          offsetY,
-          false,
-          recycler
-        )
+        fillColumnHorizontally(previousColumn, startPeriodInColumn.positionInColumn, left, offsetY, false, recycler)
         anchor.leftColumn = previousColumn
       }
     }
@@ -306,14 +287,8 @@ class TimetableLayoutManager(
       val columnNumber = columns.keyAt(it)
       val startPositionInColumn = calculateStartPeriodInColumn(columnNumber, startY, topPeriod) ?: return@forEach
       val offsetY = startY + (startPositionInColumn.startUnixMin - topPeriod.startUnixMin) * pxPerMinute
-      offsetX += fillColumnHorizontally(
-        columnNumber,
-        startPositionInColumn.positionInColumn,
-        offsetX,
-        offsetY,
-        true,
-        recycler
-      )
+      offsetX +=
+        fillColumnHorizontally(columnNumber, startPositionInColumn.positionInColumn, offsetX, offsetY, true, recycler)
 
       if (offsetX > parentRight) {
         anchor.rightColumn = columnNumber
@@ -327,19 +302,13 @@ class TimetableLayoutManager(
       val bottomView = findBottomView() ?: return 0
       val period = periods.getOrNull(bottomView.adapterPosition) ?: return 0
       val bottom = getDecoratedBottom(bottomView)
-      if (period.endUnixMin == lastEndUnixMin) if (bottom == parentBottom) 0 else min(
-        dy,
-        bottom - parentBottom
-      )
+      if (period.endUnixMin == lastEndUnixMin) if (bottom == parentBottom) 0 else min(dy, bottom - parentBottom)
       else dy
     } else {
       val topView = findTopView() ?: return 0
       val period = periods.getOrNull(topView.adapterPosition) ?: return 0
       val top = getDecoratedTop(topView)
-      if (period.startUnixMin == firstStartUnixMin) if (top == parentTop) 0 else max(
-        dy,
-        top - parentTop
-      )
+      if (period.startUnixMin == firstStartUnixMin) if (top == parentTop) 0 else max(dy, top - parentTop)
       else dy
     }
   }
@@ -512,15 +481,11 @@ class TimetableLayoutManager(
   ): Period? {
     val periods = columns[columnNumber] ?: return null
     var maxTopPeriod: Period? = null
-    periods.filter {
-      it.startUnixMin <= topPeriod.endUnixMin && it.endUnixMin >= topPeriod.startUnixMin
-    }
+    periods.filter { it.startUnixMin <= topPeriod.endUnixMin && it.endUnixMin >= topPeriod.startUnixMin }
       .forEach { period ->
         val gapHeight = (period.startUnixMin - topPeriod.startUnixMin) * pxPerMinute
         if (top + gapHeight <= parentTop)
-          maxTopPeriod = maxTopPeriod?.let {
-            if (it.startUnixMin < period.startUnixMin) period else it
-          } ?: period
+          maxTopPeriod = maxTopPeriod?.let { if (it.startUnixMin < period.startUnixMin) period else it } ?: period
       }
     return maxTopPeriod
   }
