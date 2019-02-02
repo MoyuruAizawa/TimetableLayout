@@ -411,9 +411,7 @@ class TimetableLayoutManager(
 
       if (i == startPositionInColumn) anchor.top.put(columnNum, period.adapterPosition)
       anchor.bottom.put(columnNum, period.adapterPosition)
-      if (offsetY > parentBottom) {
-        break
-      }
+      if (offsetY > parentBottom) break
     }
     return columnWidth
   }
