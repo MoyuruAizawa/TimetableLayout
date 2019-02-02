@@ -3,6 +3,7 @@ package io.moyuru.timetablelayoutmanager
 import android.graphics.Rect
 import android.os.Parcel
 import android.os.Parcelable
+import android.util.Log
 import android.util.SparseArray
 import android.util.SparseIntArray
 import android.view.View
@@ -260,11 +261,12 @@ class TimetableLayoutManager(
   }
 
   private fun layoutChildren(recycler: Recycler) {
+    val columnCount = columns.size()
     val offsetY = parentTop
     var offsetX = parentLeft
-    for (i in 0 until columns.size()) {
-      val columnNumber = columns.keyAt(i)
-      if (i == 0) anchor.leftColumn = columnNumber
+    anchor.rightColumn = columnCount
+    for (columnNumber in 0 until columnCount) {
+      if (columnNumber == 0) anchor.leftColumn = columnNumber
       offsetX += fillColumnHorizontally(columnNumber, 0, offsetX, offsetY, true, recycler)
       if (offsetX > parentRight) {
         anchor.rightColumn = columnNumber
@@ -277,12 +279,11 @@ class TimetableLayoutManager(
     var offsetX = startX
     anchor.leftColumn = firstPeriod.columnNumber
     val columnCount = columns.size()
-    val indexOfFirstColumn = columns.indexOfKey(firstPeriod.columnNumber)
+    val indexOfFirstColumn = firstPeriod.columnNumber
     val range = (indexOfFirstColumn until columnCount)
       .plus(if (shouldLoopHorizontally && indexOfFirstColumn > 0) (0 until indexOfFirstColumn) else emptyList())
-    anchor.rightColumn = columns.keyAt(requireNotNull(range.last()))
-    range.forEach {
-      val columnNumber = columns.keyAt(it)
+    anchor.rightColumn = range.last()
+    range.forEach { columnNumber ->
       val startPositionInColumn = calculateStartPeriodInColumn(columnNumber, startY, firstPeriod) ?: return@forEach
       val offsetY = startY + (startPositionInColumn.startUnixMin - firstPeriod.startUnixMin) * pxPerMinute
       offsetX +=
@@ -543,26 +544,35 @@ class TimetableLayoutManager(
         lastEndUnixMin = max(period.endUnixMin, lastEndUnixMin)
       }
     }
+
+    for (i in 0 until columns.size()) {
+      val key = columns.keyAt(i)
+      val periods = columns[i]
+      if (key != i) {
+        logw("column numbers are not Zero-based numbering.")
+        break
+      }
+      if (periods == null || periods.isEmpty())
+        logw("column $i is null or empty.")
+    }
   }
 
-  private fun Int.isFirstColumn() = columns.indexOfKey(this) == 0
+  private fun Int.isFirstColumn() = this == 0
 
-  private fun Int.isLastColumn() = columns.indexOfKey(this) == columns.size() - 1
+  private fun Int.isLastColumn() = this == columns.size() - 1
 
   private fun Int.getNextColumn(): Int? {
-    val index = columns.indexOfKey(this)
-    return if (index == columns.size() - 1)
-      if (shouldLoopHorizontally) columns.keyAt(0) else null
+    return if (this == columns.size() - 1)
+      if (shouldLoopHorizontally) 0 else null
     else
-      columns.keyAt(index + 1)
+      this + 1
   }
 
   private fun Int.getPreviousColumn(): Int? {
-    val index = columns.indexOfKey(this)
-    return if (index == 0)
-      if (shouldLoopHorizontally) columns.keyAt(columns.size() - 1) else null
+    return if (this == 0)
+      if (shouldLoopHorizontally) this - 1 else null
     else
-      columns.keyAt(index - 1)
+      this - 1
   }
 
   private inline val View.adapterPosition
@@ -577,5 +587,9 @@ class TimetableLayoutManager(
     } else {
       value
     }
+  }
+
+  private fun logw(log: String) {
+    if (BuildConfig.DEBUG) Log.w(TimetableLayoutManager::class.java.simpleName, log)
   }
 }
