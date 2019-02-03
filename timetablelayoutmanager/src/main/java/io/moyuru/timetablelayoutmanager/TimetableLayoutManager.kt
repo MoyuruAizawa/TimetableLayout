@@ -142,8 +142,12 @@ class TimetableLayoutManager(
     val offsetY = saveState?.top ?: firstVisibleView?.let(this::getDecoratedTop)
     val period = (saveState?.position ?: firstVisibleView?.adapterPosition)?.let(periods::getOrNull)
     detachAndScrapAttachedViews(recycler)
-    if (offsetX != null && offsetY != null && period != null) relayoutChildren(offsetX, offsetY, period, recycler)
-    else layoutChildren(recycler)
+    if (offsetX != null && offsetY != null && period != null) {
+      anchor.leftColumn = period.columnNumber
+      fillHorizontalChunk(period.columnNumber, offsetX, offsetY, period, true, recycler)
+    } else {
+      layoutChildren(recycler)
+    }
   }
 
   override fun onLayoutCompleted(state: State?) {
@@ -227,7 +231,11 @@ class TimetableLayoutManager(
       // append
       val right = getDecoratedRight(rightView)
       if (right < parentRight) {
-        val width = fillHorizontalChunk(anchor.rightColumn.getNextColumn() ?: return 0, right, true, recycler)
+        val topView = findTopView() ?: return 0
+        val top = getDecoratedTop(topView)
+        val topPeriod = periods[topView.adapterPosition]
+        val nextColumn = anchor.rightColumn.getNextColumn() ?: return 0
+        val width = fillHorizontalChunk(nextColumn, right, top, topPeriod, true, recycler)
         // fix layout gap
         if (right + width < parentRight) offsetChildrenHorizontal(parentRight - (right + width))
       }
@@ -240,7 +248,11 @@ class TimetableLayoutManager(
       // prepend
       val left = getDecoratedLeft(leftView)
       if (left > parentLeft) {
-        val width = fillHorizontalChunk(anchor.leftColumn.getPreviousColumn() ?: return 0, left, false, recycler)
+        val topView = findTopView() ?: return 0
+        val top = getDecoratedTop(topView)
+        val topPeriod = periods[topView.adapterPosition]
+        val previousColumn = anchor.leftColumn.getPreviousColumn() ?: return 0
+        val width = fillHorizontalChunk(previousColumn, left, top, topPeriod, false, recycler)
         // fix layout gap
         if (left - width > parentLeft) offsetChildrenHorizontal(parentLeft - (left - width))
       }
@@ -260,27 +272,6 @@ class TimetableLayoutManager(
       if (offsetX > parentRight) {
         anchor.rightColumn = columnNumber
         break
-      }
-    }
-  }
-
-  private fun relayoutChildren(startX: Int, startY: Int, firstPeriod: Period, recycler: Recycler) {
-    var offsetX = startX
-    anchor.leftColumn = firstPeriod.columnNumber
-    val columnCount = columns.size()
-    val indexOfFirstColumn = firstPeriod.columnNumber
-    val range = (indexOfFirstColumn until columnCount)
-      .plus(if (shouldLoopHorizontally && indexOfFirstColumn > 0) (0 until indexOfFirstColumn) else emptyList())
-    anchor.rightColumn = range.last()
-    range.forEach { columnNumber ->
-      val startPositionInColumn = calculateStartPeriodInColumn(columnNumber, startY, firstPeriod) ?: return@forEach
-      val offsetY = startY + (startPositionInColumn.startUnixMin - firstPeriod.startUnixMin) * pxPerMinute
-      offsetX +=
-        fillColumnHorizontally(columnNumber, startPositionInColumn.positionInColumn, offsetX, offsetY, true, recycler)
-
-      if (offsetX > parentRight) {
-        anchor.rightColumn = columnNumber
-        return
       }
     }
   }
@@ -362,9 +353,14 @@ class TimetableLayoutManager(
     return (offsetY - startY).absoluteValue
   }
 
-  private fun fillHorizontalChunk(startColumnNum: Int, startX: Int, isAppend: Boolean, recycler: Recycler): Int {
-    val topView = findTopView() ?: return 0
-    val topPeriod = periods[topView.adapterPosition]
+  private fun fillHorizontalChunk(
+    startColumnNum: Int,
+    startX: Int,
+    baseY: Int,
+    basePeriod: Period,
+    isAppend: Boolean,
+    recycler: Recycler
+  ): Int {
     val lastColumnNum = columns.size - 1
     val range = if (isAppend) {
       if (shouldLoopHorizontally && startColumnNum > 0) (startColumnNum..lastColumnNum) + (0 until startColumnNum)
@@ -376,10 +372,12 @@ class TimetableLayoutManager(
         (startColumnNum downTo 0)
     }
 
+    if (isAppend) anchor.rightColumn = range.last() else anchor.leftColumn = startColumnNum
+
     var offsetX = startX
     for (nextColumnNum in range) {
-      val startPeriod = calculateStartPeriodInColumn(nextColumnNum, getDecoratedTop(topView), topPeriod) ?: continue
-      val offsetY = getDecoratedTop(topView) + (startPeriod.startUnixMin - topPeriod.startUnixMin) * pxPerMinute
+      val startPeriod = calculateStartPeriodInColumn(nextColumnNum, baseY, basePeriod) ?: continue
+      val offsetY = baseY + (startPeriod.startUnixMin - basePeriod.startUnixMin) * pxPerMinute
       val width =
         fillColumnHorizontally(nextColumnNum, startPeriod.positionInColumn, offsetX, offsetY, isAppend, recycler)
 
