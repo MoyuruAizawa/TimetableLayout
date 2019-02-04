@@ -580,7 +580,7 @@ class TimetableLayoutManager(
   private fun Int.isLastColumn() = this == columns.size() - 1
 
   private fun Int.getNextColumn(): Int? {
-    return if (this == columns.size() - 1)
+    return if (this == columns.size - 1)
       if (shouldLoopHorizontally) 0 else null
     else
       this + 1
@@ -588,7 +588,7 @@ class TimetableLayoutManager(
 
   private fun Int.getPreviousColumn(): Int? {
     return if (this == 0)
-      if (shouldLoopHorizontally) this - 1 else null
+      if (shouldLoopHorizontally) columns.size - 1 else null
     else
       this - 1
   }
