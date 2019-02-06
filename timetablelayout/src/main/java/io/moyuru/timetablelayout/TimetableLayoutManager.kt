@@ -129,18 +129,26 @@ class TimetableLayoutManager(
     calculateColumns()
 
     val firstVisibleView = findFirstVisibleView()
-    val offsetX = saveState?.left ?: firstVisibleView?.let(this::getDecoratedLeft)
-    val offsetY = saveState?.top ?: firstVisibleView?.let(this::getDecoratedTop)
-    val period = (saveState?.position ?: anchor.top.get(anchor.leftColumn, -1)).let(periods::getOrNull)
+    val restoredOffsetX = saveState?.left ?: firstVisibleView?.let(this::getDecoratedLeft)
+    val restoredOffsetY = saveState?.top ?: firstVisibleView?.let(this::getDecoratedTop)
+    val restoredPeriod = (saveState?.position ?: anchor.top.get(anchor.leftColumn, -1)).let(periods::getOrNull)
 
     anchor.reset()
     detachAndScrapAttachedViews(recycler)
 
-    if (offsetX != null && offsetY != null && period != null) {
-      anchor.leftColumn = period.columnNumber
-      fillHorizontalChunk(period.columnNumber, offsetX, offsetY, period, true, recycler)
+    if (restoredOffsetX != null && restoredOffsetY != null && restoredPeriod != null) {
+      anchor.leftColumn = restoredPeriod.columnNumber
+      fillHorizontalChunk(restoredPeriod.columnNumber, restoredOffsetX, restoredOffsetY, restoredPeriod, true, recycler)
     } else {
-      layoutChildren(recycler)
+      anchor.leftColumn = columns.keyAt(0)
+      val columnCount = columns.size()
+      val offsetY = parentTop
+      var offsetX = parentLeft
+      for (columnNumber in 0 until columnCount) {
+        offsetX += fillColumnHorizontally(columnNumber, 0, offsetX, offsetY, true, recycler)
+        anchor.rightColumn = columnNumber
+        if (offsetX > parentRight) break
+      }
     }
   }
 
@@ -249,18 +257,6 @@ class TimetableLayoutManager(
     }
 
     return dx
-  }
-
-  private fun layoutChildren(recycler: Recycler) {
-    val columnCount = columns.size()
-    val offsetY = parentTop
-    var offsetX = parentLeft
-    for (columnNumber in 0 until columnCount) {
-      if (columnNumber == 0) anchor.leftColumn = columnNumber
-      offsetX += fillColumnHorizontally(columnNumber, 0, offsetX, offsetY, true, recycler)
-      anchor.rightColumn = columnNumber
-      if (offsetX > parentRight) break
-    }
   }
 
   private fun calculateVerticallyScrollAmount(dy: Int): Int {
