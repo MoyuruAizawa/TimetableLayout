@@ -55,7 +55,7 @@ class TimetableLayoutManager(
     }
   }
 
-  enum class Direction {
+  private enum class Direction {
     LEFT, TOP, RIGHT, BOTTOM
   }
 
@@ -102,10 +102,7 @@ class TimetableLayoutManager(
   private var saveState: SaveState? = null
 
   override fun generateDefaultLayoutParams(): RecyclerView.LayoutParams {
-    return RecyclerView.LayoutParams(
-      RecyclerView.LayoutParams.WRAP_CONTENT,
-      RecyclerView.LayoutParams.WRAP_CONTENT
-    )
+    return RecyclerView.LayoutParams(RecyclerView.LayoutParams.WRAP_CONTENT, RecyclerView.LayoutParams.WRAP_CONTENT)
   }
 
   override fun onRestoreInstanceState(state: Parcelable?) {
@@ -116,11 +113,7 @@ class TimetableLayoutManager(
     if (childCount == 0) return null
 
     val view = findFirstVisibleView() ?: return null
-    return SaveState(
-      view.adapterPosition,
-      getDecoratedLeft(view),
-      getDecoratedTop(view)
-    )
+    return SaveState(view.adapterPosition, getDecoratedLeft(view), getDecoratedTop(view))
   }
 
   override fun onLayoutChildren(recycler: Recycler, state: State) {
@@ -133,14 +126,16 @@ class TimetableLayoutManager(
       return
     }
 
-    anchor.reset()
     calculateColumns()
 
     val firstVisibleView = findFirstVisibleView()
     val offsetX = saveState?.left ?: firstVisibleView?.let(this::getDecoratedLeft)
     val offsetY = saveState?.top ?: firstVisibleView?.let(this::getDecoratedTop)
-    val period = (saveState?.position ?: firstVisibleView?.adapterPosition)?.let(periods::getOrNull)
+    val period = (saveState?.position ?: anchor.top.get(anchor.leftColumn, -1)).let(periods::getOrNull)
+
+    anchor.reset()
     detachAndScrapAttachedViews(recycler)
+
     if (offsetX != null && offsetY != null && period != null) {
       anchor.leftColumn = period.columnNumber
       fillHorizontalChunk(period.columnNumber, offsetX, offsetY, period, true, recycler)
@@ -260,14 +255,11 @@ class TimetableLayoutManager(
     val columnCount = columns.size()
     val offsetY = parentTop
     var offsetX = parentLeft
-    anchor.rightColumn = columnCount
     for (columnNumber in 0 until columnCount) {
       if (columnNumber == 0) anchor.leftColumn = columnNumber
       offsetX += fillColumnHorizontally(columnNumber, 0, offsetX, offsetY, true, recycler)
-      if (offsetX > parentRight) {
-        anchor.rightColumn = columnNumber
-        break
-      }
+      anchor.rightColumn = columnNumber
+      if (offsetX > parentRight) break
     }
   }
 
@@ -511,11 +503,7 @@ class TimetableLayoutManager(
       })
   }
 
-  private fun calculateStartPeriodInColumn(
-    columnNumber: Int,
-    top: Int,
-    topPeriod: Period
-  ): Period? {
+  private fun calculateStartPeriodInColumn(columnNumber: Int, top: Int, topPeriod: Period): Period? {
     val periods = columns[columnNumber] ?: return null
     var maxTopPeriod: Period? = null
     periods.filter { it.startUnixMin <= topPeriod.endUnixMin && it.endUnixMin >= topPeriod.startUnixMin }
