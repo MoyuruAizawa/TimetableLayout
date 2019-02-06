@@ -20,7 +20,7 @@ class MainActivity : AppCompatActivity() {
     val adapter = GroupAdapter<ViewHolder>()
     val periods = fillWithSpacer(createPrograms())
     binding.recyclerView.addItemDecoration(Decoration(periods, 130.dp, 2.dp, 64.dp, 64.dp))
-    binding.recyclerView.layoutManager = TimetableLayoutManager(130.dp, 2.dp, true) {
+    binding.recyclerView.layoutManager = TimetableLayoutManager(130.dp, 2.dp) {
       val period = periods[it]
       TimetableLayoutManager.PeriodInfo(period.startAt, period.endAt, period.stageNumber)
     }

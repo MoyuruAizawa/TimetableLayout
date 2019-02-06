@@ -22,7 +22,6 @@ import kotlin.math.min
 class TimetableLayoutManager(
   private val columnWidth: Int,
   private val pxPerMinute: Int,
-  private val shouldLoopHorizontally: Boolean,
   private val periodLookUp: (position: Int) -> PeriodInfo
 ) : RecyclerView.LayoutManager() {
 
@@ -226,7 +225,7 @@ class TimetableLayoutManager(
       // recycle
       if (getDecoratedRight(leftView) < parentLeft) {
         findViewsByColumn(anchor.leftColumn).forEach { removeAndRecycleView(it, recycler) }
-        anchor.leftColumn.getNextColumn()?.let { anchor.leftColumn = it }
+        anchor.leftColumn.getNextColumn().let { anchor.leftColumn = it }
       }
       // append
       val right = getDecoratedRight(rightView)
@@ -234,7 +233,7 @@ class TimetableLayoutManager(
         val topView = findTopView() ?: return 0
         val top = getDecoratedTop(topView)
         val topPeriod = periods[topView.adapterPosition]
-        val nextColumn = anchor.rightColumn.getNextColumn() ?: return 0
+        val nextColumn = anchor.rightColumn.getNextColumn()
         val width = fillHorizontalChunk(nextColumn, right, top, topPeriod, true, recycler)
         // fix layout gap
         if (right + width < parentRight) offsetChildrenHorizontal(parentRight - (right + width))
@@ -243,7 +242,7 @@ class TimetableLayoutManager(
       // recycle
       if (getDecoratedLeft(rightView) > parentRight) {
         findViewsByColumn(anchor.rightColumn).forEach { removeAndRecycleView(it, recycler) }
-        anchor.rightColumn.getPreviousColumn()?.let { anchor.rightColumn = it }
+        anchor.rightColumn.getPreviousColumn().let { anchor.rightColumn = it }
       }
       // prepend
       val left = getDecoratedLeft(leftView)
@@ -251,7 +250,7 @@ class TimetableLayoutManager(
         val topView = findTopView() ?: return 0
         val top = getDecoratedTop(topView)
         val topPeriod = periods[topView.adapterPosition]
-        val previousColumn = anchor.leftColumn.getPreviousColumn() ?: return 0
+        val previousColumn = anchor.leftColumn.getPreviousColumn()
         val width = fillHorizontalChunk(previousColumn, left, top, topPeriod, false, recycler)
         // fix layout gap
         if (left - width > parentLeft) offsetChildrenHorizontal(parentLeft - (left - width))
@@ -293,7 +292,7 @@ class TimetableLayoutManager(
   }
 
   private fun calculateHorizontallyScrollAmount(dx: Int, left: Int, right: Int): Int {
-    if (shouldLoopHorizontally && (!anchor.leftColumn.isFirstColumn() || !anchor.rightColumn.isLastColumn())) return dx
+    if (!anchor.leftColumn.isFirstColumn() || !anchor.rightColumn.isLastColumn()) return dx
 
     return if (dx > 0) {
       if (anchor.rightColumn.isLastColumn())
@@ -363,13 +362,11 @@ class TimetableLayoutManager(
   ): Int {
     val lastColumnNum = columns.size - 1
     val range = if (isAppend) {
-      if (shouldLoopHorizontally && startColumnNum > 0) (startColumnNum..lastColumnNum) + (0 until startColumnNum)
+      if (startColumnNum > 0) (startColumnNum..lastColumnNum) + (0 until startColumnNum)
       else startColumnNum..lastColumnNum
     } else {
-      if (shouldLoopHorizontally && startColumnNum < lastColumnNum)
-        (startColumnNum downTo 0) + (lastColumnNum downTo startColumnNum + 1)
-      else
-        (startColumnNum downTo 0)
+      if (startColumnNum < lastColumnNum) (startColumnNum downTo 0) + (lastColumnNum downTo startColumnNum + 1)
+      else (startColumnNum downTo 0)
     }
 
     if (isAppend) anchor.rightColumn = range.last() else anchor.leftColumn = startColumnNum
@@ -579,19 +576,9 @@ class TimetableLayoutManager(
 
   private fun Int.isLastColumn() = this == columns.size() - 1
 
-  private fun Int.getNextColumn(): Int? {
-    return if (this == columns.size - 1)
-      if (shouldLoopHorizontally) 0 else null
-    else
-      this + 1
-  }
+  private fun Int.getNextColumn() = if (this == columns.size - 1) 0 else this + 1
 
-  private fun Int.getPreviousColumn(): Int? {
-    return if (this == 0)
-      if (shouldLoopHorizontally) columns.size - 1 else null
-    else
-      this - 1
-  }
+  private fun Int.getPreviousColumn() = if (this == 0) columns.size - 1 else this - 1
 
   private inline val View.adapterPosition
     get() = (layoutParams as RecyclerView.LayoutParams).viewAdapterPosition
