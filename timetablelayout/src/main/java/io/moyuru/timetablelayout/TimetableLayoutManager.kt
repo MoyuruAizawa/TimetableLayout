@@ -234,9 +234,7 @@ class TimetableLayoutManager(
         val top = getDecoratedTop(topView)
         val topPeriod = periods[topView.adapterPosition]
         val nextColumn = anchor.rightColumn.getNextColumn()
-        val width = fillHorizontalChunk(nextColumn, right, top, topPeriod, true, recycler)
-        // fix layout gap
-        if (right + width < parentRight) offsetChildrenHorizontal(parentRight - (right + width))
+        fillHorizontalChunk(nextColumn, right, top, topPeriod, true, recycler)
       }
     } else {
       // recycle
@@ -251,9 +249,7 @@ class TimetableLayoutManager(
         val top = getDecoratedTop(topView)
         val topPeriod = periods[topView.adapterPosition]
         val previousColumn = anchor.leftColumn.getPreviousColumn()
-        val width = fillHorizontalChunk(previousColumn, left, top, topPeriod, false, recycler)
-        // fix layout gap
-        if (left - width > parentLeft) offsetChildrenHorizontal(parentLeft - (left - width))
+        fillHorizontalChunk(previousColumn, left, top, topPeriod, false, recycler)
       }
     }
 
