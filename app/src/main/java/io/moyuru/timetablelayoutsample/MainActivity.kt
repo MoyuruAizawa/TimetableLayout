@@ -1,4 +1,4 @@
-package io.moyuru.timetablelayoutmanagersample
+package io.moyuru.timetablelayoutsample
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -7,6 +7,7 @@ import com.jakewharton.threetenabp.AndroidThreeTen
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.ViewHolder
 import io.moyuru.timetablelayout.TimetableLayoutManager
+import io.moyuru.timetablelayoutsample.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 

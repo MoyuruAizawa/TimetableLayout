@@ -1,4 +1,4 @@
-package io.moyuru.timetablelayoutmanagersample
+package io.moyuru.timetablelayoutsample
 
 import android.content.res.Resources
 

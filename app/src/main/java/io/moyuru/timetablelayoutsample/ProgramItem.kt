@@ -1,7 +1,7 @@
-package io.moyuru.timetablelayoutmanagersample
+package io.moyuru.timetablelayoutsample
 
 import com.xwray.groupie.databinding.BindableItem
-import io.moyuru.timetablelayoutmanagersample.databinding.ItemProgramBinding
+import io.moyuru.timetablelayoutsample.databinding.ItemProgramBinding
 
 class ProgramItem(private val program: Program) : BindableItem<ItemProgramBinding>() {
   override fun getLayout() = R.layout.item_program

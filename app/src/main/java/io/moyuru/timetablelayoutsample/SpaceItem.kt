@@ -1,7 +1,7 @@
-package io.moyuru.timetablelayoutmanagersample
+package io.moyuru.timetablelayoutsample
 
 import com.xwray.groupie.databinding.BindableItem
-import io.moyuru.timetablelayoutmanagersample.databinding.ItemSpaceBinding
+import io.moyuru.timetablelayoutsample.databinding.ItemSpaceBinding
 
 class SpaceItem : BindableItem<ItemSpaceBinding>() {
   override fun getLayout() = R.layout.item_space
