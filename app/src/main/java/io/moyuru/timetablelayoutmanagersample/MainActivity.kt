@@ -6,8 +6,7 @@ import androidx.databinding.DataBindingUtil
 import com.jakewharton.threetenabp.AndroidThreeTen
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.ViewHolder
-import io.moyuru.timetablelayoutmanager.TimetableLayoutManager
-import io.moyuru.timetablelayoutmanagersample.databinding.ActivityMainBinding
+import io.moyuru.timetablelayout.TimetableLayoutManager
 
 class MainActivity : AppCompatActivity() {
 

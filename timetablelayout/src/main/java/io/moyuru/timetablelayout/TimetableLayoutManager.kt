@@ -1,4 +1,4 @@
-package io.moyuru.timetablelayoutmanager
+package io.moyuru.timetablelayout
 
 import android.graphics.Rect
 import android.os.Parcel

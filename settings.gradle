@@ -1,1 +1,1 @@
-include ':app', ':timetablelayoutmanager'
+include ':app', ':timetablelayout'
