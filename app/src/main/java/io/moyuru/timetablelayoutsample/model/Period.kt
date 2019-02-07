@@ -1,4 +1,4 @@
-package io.moyuru.timetablelayoutsample
+package io.moyuru.timetablelayoutsample.model
 
 import org.threeten.bp.LocalDateTime
 import org.threeten.bp.ZoneOffset

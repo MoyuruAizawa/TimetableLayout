@@ -9,7 +9,7 @@
 
     <variable
         name="program"
-        type="io.moyuru.timetablelayoutsample.Program"
+        type="io.moyuru.timetablelayoutsample.model.Program"
         />
   </data>
 

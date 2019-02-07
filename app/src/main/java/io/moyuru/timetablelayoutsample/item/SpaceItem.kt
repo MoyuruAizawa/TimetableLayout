@@ -1,6 +1,7 @@
-package io.moyuru.timetablelayoutsample
+package io.moyuru.timetablelayoutsample.item
 
 import com.xwray.groupie.databinding.BindableItem
+import io.moyuru.timetablelayoutsample.R
 import io.moyuru.timetablelayoutsample.databinding.ItemSpaceBinding
 
 class SpaceItem : BindableItem<ItemSpaceBinding>() {

@@ -8,6 +8,12 @@ import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.ViewHolder
 import io.moyuru.timetablelayout.TimetableLayoutManager
 import io.moyuru.timetablelayoutsample.databinding.ActivityMainBinding
+import io.moyuru.timetablelayoutsample.item.ProgramItem
+import io.moyuru.timetablelayoutsample.item.SpaceItem
+import io.moyuru.timetablelayoutsample.model.EmptyPeriod
+import io.moyuru.timetablelayoutsample.model.Period
+import io.moyuru.timetablelayoutsample.model.Program
+import io.moyuru.timetablelayoutsample.model.createPrograms
 
 class MainActivity : AppCompatActivity() {
 
@@ -46,17 +52,35 @@ class MainActivity : AppCompatActivity() {
       val sessionsInSameRoom = sortedPrograms.filter { it.stageNumber == roomNumber }
       sessionsInSameRoom.forEachIndexed { index, session ->
         if (index == 0 && session.startAt > firstProgramStartAt)
-          filledPeriod.add(EmptyPeriod(firstProgramStartAt, session.startAt, roomNumber))
+          filledPeriod.add(
+            EmptyPeriod(
+              firstProgramStartAt,
+              session.startAt,
+              roomNumber
+            )
+          )
 
         filledPeriod.add(session)
 
         if (index == sessionsInSameRoom.size - 1 && session.endAt < lastProgramEndAt) {
-          filledPeriod.add(EmptyPeriod(session.endAt, lastProgramEndAt, roomNumber))
+          filledPeriod.add(
+            EmptyPeriod(
+              session.endAt,
+              lastProgramEndAt,
+              roomNumber
+            )
+          )
         }
 
         val nextSession = sessionsInSameRoom.getOrNull(index + 1) ?: return@forEachIndexed
         if (session.endAt != nextSession.startAt)
-          filledPeriod.add(EmptyPeriod(session.endAt, nextSession.startAt, roomNumber))
+          filledPeriod.add(
+            EmptyPeriod(
+              session.endAt,
+              nextSession.startAt,
+              roomNumber
+            )
+          )
       }
     }
     return filledPeriod.sortedBy { it.startAt }

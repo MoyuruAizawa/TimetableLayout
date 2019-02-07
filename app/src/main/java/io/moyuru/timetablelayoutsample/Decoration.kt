@@ -6,6 +6,7 @@ import android.graphics.Paint
 import android.graphics.Rect
 import androidx.core.view.children
 import androidx.recyclerview.widget.RecyclerView
+import io.moyuru.timetablelayoutsample.model.Period
 import org.threeten.bp.LocalDateTime
 import org.threeten.bp.ZoneOffset
 import org.threeten.bp.format.DateTimeFormatter
