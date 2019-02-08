@@ -8,11 +8,11 @@
       android:id="@+id/recyclerView"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
-      android:background="#222"
+      android:background="@color/black"
       android:overScrollMode="never"
-      android:paddingStart="64dp"
+      android:paddingLeft="@dimen/timeLabelWidth"
       android:paddingTop="64dp"
-      tools:ignore="RtlSymmetry"
+      tools:ignore="RtlHardcoded,RtlSymmetry"
       />
 
 </layout>

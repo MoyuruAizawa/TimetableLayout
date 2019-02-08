@@ -3,7 +3,6 @@ package io.moyuru.timetablelayout
 import android.graphics.Rect
 import android.os.Parcel
 import android.os.Parcelable
-import android.util.Log
 import android.util.SparseArray
 import android.util.SparseIntArray
 import android.view.View
@@ -20,7 +19,7 @@ import kotlin.math.min
 
 class TimetableLayoutManager(
   private val columnWidth: Int,
-  private val pxPerMinute: Int,
+  private val heightPerMinute: Int,
   private val periodLookUp: (position: Int) -> PeriodInfo
 ) : RecyclerView.LayoutManager() {
 
@@ -376,7 +375,7 @@ class TimetableLayoutManager(
     var offsetX = startX
     for (nextColumnNum in range) {
       val startPeriod = calculateStartPeriodInColumn(nextColumnNum, baseY, basePeriod) ?: continue
-      val offsetY = baseY + (startPeriod.startUnixMin - basePeriod.startUnixMin) * pxPerMinute
+      val offsetY = baseY + (startPeriod.startUnixMin - basePeriod.startUnixMin) * heightPerMinute
       val width =
         fillColumnHorizontally(nextColumnNum, startPeriod.positionInColumn, offsetX, offsetY, isAppend, recycler)
 
@@ -426,7 +425,7 @@ class TimetableLayoutManager(
     val bottom = getDecoratedBottom(bottomView)
     if (bottom > parentBottom) return
 
-    val expectedGap = (lastEndUnixMin - bottomPeriod.endUnixMin) * pxPerMinute
+    val expectedGap = (lastEndUnixMin - bottomPeriod.endUnixMin) * heightPerMinute
     val actualGap = (parentBottom - bottom)
     offsetChildrenVertical(actualGap - expectedGap)
     anchor.top.forEach { columnNum, position ->
@@ -445,7 +444,7 @@ class TimetableLayoutManager(
   private fun measureChild(view: View, period: Period) {
     val lp = view.layoutParams as RecyclerView.LayoutParams
     lp.width = columnWidth
-    lp.height = period.durationMin * pxPerMinute
+    lp.height = period.durationMin * heightPerMinute
 
     val insets = Rect().apply { calculateItemDecorationsForChild(view, this) }
     val widthSpec = getChildMeasureSpec(
@@ -544,7 +543,7 @@ class TimetableLayoutManager(
     var maxTopPeriod: Period? = null
     periods.filter { it.startUnixMin <= topPeriod.endUnixMin && it.endUnixMin >= topPeriod.startUnixMin }
       .forEach { period ->
-        val gapHeight = (period.startUnixMin - topPeriod.startUnixMin) * pxPerMinute
+        val gapHeight = (period.startUnixMin - topPeriod.startUnixMin) * heightPerMinute
         if (top + gapHeight <= parentTop)
           maxTopPeriod = maxTopPeriod?.let { if (it.startUnixMin < period.startUnixMin) period else it } ?: period
       }
@@ -599,22 +598,4 @@ class TimetableLayoutManager(
   private fun Int.getNextColumn() = if (this == columns.size - 1) 0 else this + 1
 
   private fun Int.getPreviousColumn() = if (this == 0) columns.size - 1 else this - 1
-
-  private inline val View.adapterPosition
-    get() = (layoutParams as RecyclerView.LayoutParams).viewAdapterPosition
-
-  private inline fun <E> SparseArray<E>.getOrPut(key: Int, defaultValue: () -> E): E {
-    val value = get(key)
-    return if (value == null) {
-      val answer = defaultValue()
-      put(key, answer)
-      answer
-    } else {
-      value
-    }
-  }
-
-  private fun logw(log: String) {
-    if (BuildConfig.DEBUG) Log.w(TimetableLayoutManager::class.java.simpleName, log)
-  }
 }
