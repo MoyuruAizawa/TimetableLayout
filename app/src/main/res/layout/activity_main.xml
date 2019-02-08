@@ -13,7 +13,6 @@
       android:paddingStart="64dp"
       android:paddingTop="64dp"
       tools:ignore="RtlSymmetry"
-      >
+      />
 
-  </androidx.recyclerview.widget.RecyclerView>
 </layout>

@@ -18,7 +18,6 @@ import kotlin.math.absoluteValue
 import kotlin.math.max
 import kotlin.math.min
 
-// TODO: implement scrollToPosition
 class TimetableLayoutManager(
   private val columnWidth: Int,
   private val pxPerMinute: Int,
@@ -99,6 +98,7 @@ class TimetableLayoutManager(
   private var firstStartUnixMin = NO_TIME
   private var lastEndUnixMin = NO_TIME
 
+  private var pendingScrollPosition = NO_POSITION
   private var saveState: SaveState? = null
 
   override fun generateDefaultLayoutParams(): RecyclerView.LayoutParams {
@@ -128,6 +128,17 @@ class TimetableLayoutManager(
 
     calculateColumns()
 
+    if (pendingScrollPosition != NO_POSITION) {
+      anchor.reset()
+      detachAndScrapAttachedViews(recycler)
+      periods.getOrNull(pendingScrollPosition)?.let { period ->
+        anchor.leftColumn = period.columnNumber
+        fillHorizontalChunk(period.columnNumber, parentLeft, parentTop, period, true, recycler)
+        fixBottomLayoutGap(recycler)
+      }
+      return
+    }
+
     val firstVisibleView = findFirstVisibleView()
     val restoredOffsetX = saveState?.left ?: firstVisibleView?.let(this::getDecoratedLeft)
     val restoredOffsetY = saveState?.top ?: firstVisibleView?.let(this::getDecoratedTop)
@@ -153,7 +164,14 @@ class TimetableLayoutManager(
   }
 
   override fun onLayoutCompleted(state: State?) {
+    pendingScrollPosition = NO_POSITION
     saveState = null
+  }
+
+  override fun scrollToPosition(position: Int) {
+    if (position < 0 || position >= itemCount) return
+    pendingScrollPosition = position
+    requestLayout()
   }
 
   override fun canScrollVertically() = true
@@ -400,6 +418,28 @@ class TimetableLayoutManager(
       if (offsetY > parentBottom) break
     }
     return columnWidth
+  }
+
+  private fun fixBottomLayoutGap(recycler: Recycler) {
+    val bottomView = findBottomView() ?: return
+    val bottomPeriod = periods[bottomView.adapterPosition]
+    val bottom = getDecoratedBottom(bottomView)
+    if (bottom > parentBottom) return
+
+    val expectedGap = (lastEndUnixMin - bottomPeriod.endUnixMin) * pxPerMinute
+    val actualGap = (parentBottom - bottom)
+    offsetChildrenVertical(actualGap - expectedGap)
+    anchor.top.forEach { columnNum, position ->
+      val view = findViewByPosition(position) ?: return@forEach
+      val top = getDecoratedTop(view)
+      if (top > parentTop) {
+        val left = getDecoratedLeft(view)
+        val anchorPeriod = periods.getOrNull(position) ?: return@forEach
+        val nextPeriod = columns.get(columnNum)
+          .getOrNull(anchorPeriod.positionInColumn - 1) ?: return@forEach
+        fillColumnVertically(nextPeriod, left, top, false, recycler)
+      }
+    }
   }
 
   private fun measureChild(view: View, period: Period) {
