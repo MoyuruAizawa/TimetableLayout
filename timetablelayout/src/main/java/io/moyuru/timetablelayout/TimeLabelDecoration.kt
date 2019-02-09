@@ -39,12 +39,12 @@ abstract class TimeLabelDecoration(
 
     val startAtList = (0 until adapter.itemCount).map(this::getStartUnixMillis)
 
-    val base = parent.children
-      .filter { canDecorate(it.layoutPosition) && it.top <= parent.paddingTop }
-      .minBy { it.top } ?: return
+    val base = parent.children.filter { it.top <= parent.paddingTop }.minBy { it.top } ?: return
     val baseEpochMillis = startAtList.getOrNull(base.layoutPosition) ?: return
 
-    startAtList.filter { it >= baseEpochMillis }
+    startAtList
+      .filterIndexed { i, startAt -> startAt >= baseEpochMillis && canDecorate(i) }
+      .distinct()
       .forEach { startAt ->
         val gap = TimeUnit.MILLISECONDS.toMinutes(startAt - baseEpochMillis) * heightPerMinute
         val top = base.top + gap
