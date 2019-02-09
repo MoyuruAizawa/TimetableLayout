@@ -1,8 +1,9 @@
-package io.moyuru.timetablelayout
+package io.moyuru.timetablelayout.layoutmanager
 
 import android.graphics.Rect
 import android.os.Parcel
 import android.os.Parcelable
+import android.util.Log
 import android.util.SparseArray
 import android.util.SparseIntArray
 import android.view.View
@@ -12,6 +13,9 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.NO_POSITION
 import androidx.recyclerview.widget.RecyclerView.Recycler
 import androidx.recyclerview.widget.RecyclerView.State
+import io.moyuru.timetablelayout.BuildConfig
+import io.moyuru.timetablelayout.adapterPosition
+import io.moyuru.timetablelayout.getOrPut
 import java.util.concurrent.TimeUnit
 import kotlin.math.absoluteValue
 import kotlin.math.max
@@ -112,7 +116,11 @@ class TimetableLayoutManager(
     if (childCount == 0) return null
 
     val view = findFirstVisibleView() ?: return null
-    return SaveState(view.adapterPosition, getDecoratedLeft(view), getDecoratedTop(view))
+    return SaveState(
+      view.adapterPosition,
+      getDecoratedLeft(view),
+      getDecoratedTop(view)
+    )
   }
 
   override fun onLayoutChildren(recycler: Recycler, state: State) {
@@ -598,4 +606,8 @@ class TimetableLayoutManager(
   private fun Int.getNextColumn() = if (this == columns.size - 1) 0 else this + 1
 
   private fun Int.getPreviousColumn() = if (this == 0) columns.size - 1 else this - 1
+
+  private fun logw(log: String) {
+    if (BuildConfig.DEBUG) Log.w(TimetableLayoutManager::class.java.simpleName, log)
+  }
 }

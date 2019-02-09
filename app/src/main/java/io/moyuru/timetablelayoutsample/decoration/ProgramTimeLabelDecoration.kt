@@ -3,7 +3,7 @@ package io.moyuru.timetablelayoutsample.decoration
 import android.content.Context
 import android.graphics.Color
 import androidx.core.content.ContextCompat
-import io.moyuru.timetablelayout.TimeLabelDecoration
+import io.moyuru.timetablelayout.decoration.TimeLabelDecoration
 import io.moyuru.timetablelayoutsample.R
 import io.moyuru.timetablelayoutsample.model.Period
 import io.moyuru.timetablelayoutsample.model.Program

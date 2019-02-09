@@ -1,4 +1,4 @@
-package io.moyuru.timetablelayout
+package io.moyuru.timetablelayout.decoration
 
 import android.graphics.Canvas
 import android.graphics.Paint
@@ -6,6 +6,8 @@ import android.graphics.Rect
 import androidx.annotation.ColorInt
 import androidx.core.view.children
 import androidx.recyclerview.widget.RecyclerView
+import io.moyuru.timetablelayout.drawTextAtCenter
+import io.moyuru.timetablelayout.layoutPosition
 
 abstract class ColumnNameDecoration(
   columnCount: Int,

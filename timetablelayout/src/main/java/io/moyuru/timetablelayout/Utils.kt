@@ -3,7 +3,6 @@ package io.moyuru.timetablelayout
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Rect
-import android.util.Log
 import android.util.SparseArray
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
@@ -32,8 +31,4 @@ internal fun Canvas.drawTextAtCenter(text: String, rect: Rect, paint: Paint) {
       if (textBounds.height() != 0) textBounds.height() / 2f
       else -(paint.fontMetrics.ascent + paint.fontMetrics.descent) / 2f
   drawText(text, baseX, baseY, paint)
-}
-
-internal fun logw(log: String) {
-  if (BuildConfig.DEBUG) Log.w(TimetableLayoutManager::class.java.simpleName, log)
 }

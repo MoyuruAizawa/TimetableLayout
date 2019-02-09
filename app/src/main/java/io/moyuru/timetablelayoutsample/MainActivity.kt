@@ -6,7 +6,7 @@ import androidx.databinding.DataBindingUtil
 import com.jakewharton.threetenabp.AndroidThreeTen
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.ViewHolder
-import io.moyuru.timetablelayout.TimetableLayoutManager
+import io.moyuru.timetablelayout.layoutmanager.TimetableLayoutManager
 import io.moyuru.timetablelayoutsample.databinding.ActivityMainBinding
 import io.moyuru.timetablelayoutsample.decoration.ProgramTimeLabelDecoration
 import io.moyuru.timetablelayoutsample.decoration.StageNameDecoration
@@ -33,9 +33,16 @@ class MainActivity : AppCompatActivity() {
       StageNameDecoration(this, periods, periods.distinctBy { it.stageNumber }.size)
     )
     binding.recyclerView.layoutManager =
-      TimetableLayoutManager(resources.getDimensionPixelSize(R.dimen.columnWidth), heightPerMin) {
+      TimetableLayoutManager(
+        resources.getDimensionPixelSize(R.dimen.columnWidth),
+        heightPerMin
+      ) {
         val period = periods[it]
-        TimetableLayoutManager.PeriodInfo(period.startAt, period.endAt, period.stageNumber)
+        TimetableLayoutManager.PeriodInfo(
+          period.startAt,
+          period.endAt,
+          period.stageNumber
+        )
       }
     binding.recyclerView.adapter = adapter
     periods.map {
