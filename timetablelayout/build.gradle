@@ -1,5 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
+apply plugin: 'com.novoda.bintray-release'
 
 android {
   compileSdkVersion 28
@@ -24,7 +25,7 @@ android {
 
 dependencies {
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-  implementation 'androidx.appcompat:appcompat:1.1.0-alpha01'
+  implementation 'androidx.appcompat:appcompat:1.1.0-alpha02'
   implementation "androidx.core:core-ktx:1.0.1"
   implementation "com.google.android.material:material:1.1.0-alpha03"
 
@@ -34,4 +35,13 @@ dependencies {
 }
 repositories {
   mavenCentral()
+}
+
+publish {
+  userOrg = 'lvla'
+  groupId = 'io.moyuru'
+  artifactId = 'timetablelayout'
+  publishVersion = "1.0.0-alpha01"
+  desc = 'LayoutManager to display the timetable'
+  website = 'https://github.com/MoyuruAizawa/TimetableLayout'
 }
