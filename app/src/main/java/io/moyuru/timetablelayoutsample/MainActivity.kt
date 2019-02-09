@@ -1,17 +1,15 @@
 package io.moyuru.timetablelayoutsample
 
-import android.graphics.Color
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import com.jakewharton.threetenabp.AndroidThreeTen
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.ViewHolder
 import io.moyuru.timetablelayout.TimetableLayoutManager
 import io.moyuru.timetablelayoutsample.databinding.ActivityMainBinding
-import io.moyuru.timetablelayoutsample.decoration.Decoration
 import io.moyuru.timetablelayoutsample.decoration.ProgramTimeLabelDecoration
+import io.moyuru.timetablelayoutsample.decoration.StageNameDecoration
 import io.moyuru.timetablelayoutsample.item.ProgramItem
 import io.moyuru.timetablelayoutsample.item.SpaceItem
 import io.moyuru.timetablelayoutsample.model.EmptyPeriod
@@ -30,21 +28,15 @@ class MainActivity : AppCompatActivity() {
     val adapter = GroupAdapter<ViewHolder>()
     val periods = fillWithSpacer(createPrograms())
     val heightPerMin = resources.getDimensionPixelSize(R.dimen.heightPerMinute)
+    binding.recyclerView.addItemDecoration(ProgramTimeLabelDecoration(this, periods, heightPerMin))
     binding.recyclerView.addItemDecoration(
-      ProgramTimeLabelDecoration(
-        periods,
-        resources.getDimensionPixelSize(R.dimen.timeLabelWidth),
-        heightPerMin,
-        resources.getDimension(R.dimen.timeLabelTextSize),
-        Color.WHITE,
-        ContextCompat.getColor(this, R.color.black)
-      )
+      StageNameDecoration(this, periods, periods.distinctBy { it.stageNumber }.size)
     )
-    binding.recyclerView.addItemDecoration(Decoration(periods, 130.dp, 64.dp))
-    binding.recyclerView.layoutManager = TimetableLayoutManager(130.dp, heightPerMin) {
-      val period = periods[it]
-      TimetableLayoutManager.PeriodInfo(period.startAt, period.endAt, period.stageNumber)
-    }
+    binding.recyclerView.layoutManager =
+      TimetableLayoutManager(resources.getDimensionPixelSize(R.dimen.columnWidth), heightPerMin) {
+        val period = periods[it]
+        TimetableLayoutManager.PeriodInfo(period.startAt, period.endAt, period.stageNumber)
+      }
     binding.recyclerView.adapter = adapter
     periods.map {
       when (it) {

@@ -1,20 +1,24 @@
 package io.moyuru.timetablelayoutsample.decoration
 
+import android.content.Context
+import android.graphics.Color
+import androidx.core.content.ContextCompat
 import io.moyuru.timetablelayout.TimeLabelDecoration
+import io.moyuru.timetablelayoutsample.R
 import io.moyuru.timetablelayoutsample.model.Period
 import io.moyuru.timetablelayoutsample.model.Program
 import org.threeten.bp.LocalDateTime
 import org.threeten.bp.ZoneOffset
 import org.threeten.bp.format.DateTimeFormatter
 
-class ProgramTimeLabelDecoration(
-  private val periods: List<Period>,
-  width: Int,
-  heightPerMinute: Int,
-  timeTextSize: Float,
-  timeTextColor: Int,
-  backgroundColor: Int
-) : TimeLabelDecoration(width, heightPerMinute, timeTextSize, timeTextColor, backgroundColor) {
+class ProgramTimeLabelDecoration(context: Context, private val periods: List<Period>, heightPerMin: Int) :
+  TimeLabelDecoration(
+    context.resources.getDimensionPixelSize(R.dimen.timeLabelWidth),
+    heightPerMin,
+    context.resources.getDimension(R.dimen.timeLabelTextSize),
+    Color.WHITE,
+    ContextCompat.getColor(context, R.color.black)
+  ) {
 
   private val formatter = DateTimeFormatter.ofPattern("HH:mm")
 
