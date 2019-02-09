@@ -74,7 +74,7 @@ fun createPrograms(): List<Program> {
     listOf(
       "American Me",
       "Fathoms",
-      "Elitist",
+      "Wage War",
       "Rise of the North Star",
       "Awaken Demons",
       "Legend",

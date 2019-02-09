@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <dimen name="columnWidth">130dp</dimen>
-  <dimen name="heightPerMinute">2dp</dimen>
+  <dimen name="heightPerMinute">3dp</dimen>
   <dimen name="timeLabelWidth">64dp</dimen>
   <dimen name="timeLabelTextSize">12dp</dimen>
   <dimen name="stageLabelHeight">@dimen/timeLabelWidth</dimen>
