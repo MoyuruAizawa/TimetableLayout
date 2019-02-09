@@ -1,15 +1,24 @@
 # TimetableLayout
 
+![Platform](https://img.shields.io/badge/Platform-Android-orange.svg)
 ![API](https://img.shields.io/badge/API-16%2B-green.svg)
-![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)  
-TimetableLayout is a layout manager and item decorations for display the timetable.
+![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)
+[![Download](https://api.bintray.com/packages/lvla/maven/timetablelayout/images/download.svg?version=1.0.0-alpha01)](https://bintray.com/lvla/maven/timetablelayout/1.0.0-alpha01/link)
+[![Build Status](https://app.bitrise.io/app/3b60f49233ad83fe/status.svg?token=80izoZqZH6T38vmGGU602w&branch=master)](https://app.bitrise.io/app/3b60f49233ad83fe)  
+TimetableLayout is a layout manager and item decorations to display the timetable.
 
 ![sample01](https://github.com/MoyuruAizawa/Images/blob/master/TimetableLayout/sample_01.gif?raw=true)
+![sample02](https://github.com/MoyuruAizawa/Images/blob/master/TimetableLayout/sample_02.gif?raw=true)
 
 # Usage
+**Dependency**
+```groovy
+implementation 'io.moyuru:timetablelayout:1.0.0-alpha01'
+```
+
 **LayoutManager**
 ```kotlin
-binding.recyclerView.layoutManager = TimetableLayoutManager(columnWidth, heightPerMin) { position ->
+recyclerView.layoutManager = TimetableLayoutManager(columnWidth, heightPerMin) { position ->
   val period = periods[position]
   TimetableLayoutManager.PeriodInfo(period.startAt, period.endAt, period.stageNumber)
 }
@@ -17,8 +26,8 @@ binding.recyclerView.layoutManager = TimetableLayoutManager(columnWidth, heightP
 
 **ItemDecoration**
 ```kotlin
-binding.recyclerView.addItemDecoration(ProgramTimeLabelDecoration(context, periods, heightPerMin))
-binding.recyclerView.addItemDecoration(StageNameDecoration(context, periods, columnCount))
+recyclerView.addItemDecoration(ProgramTimeLabelDecoration(context, periods, heightPerMin))
+recyclerView.addItemDecoration(StageNameDecoration(context, periods, columnCount))
 
 class ProgramTimeLabelDecoration(private val periods: List<Period>, ...) : TimeLabelDecoration(...) {
 
