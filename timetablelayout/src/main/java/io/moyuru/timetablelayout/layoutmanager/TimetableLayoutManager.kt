@@ -163,7 +163,7 @@ class TimetableLayoutManager(
       val offsetY = parentTop
       var offsetX = parentLeft
       for (columnNumber in 0 until columnCount) {
-        offsetX += fillColumnHorizontally(columnNumber, 0, offsetX, offsetY, true, recycler)
+        offsetX += fillColumnHorizontally(columns[columnNumber].first(), offsetX, offsetY, true, recycler)
         anchor.rightColumn = columnNumber
         if (offsetX > parentRight) break
       }
@@ -361,6 +361,32 @@ class TimetableLayoutManager(
     return (offsetY - startY).absoluteValue
   }
 
+  private fun fillColumnHorizontally(
+    startPeriod: Period,
+    offsetX: Int,
+    startY: Int,
+    isAppend: Boolean,
+    recycler: Recycler
+  ): Int {
+    val columnNum = startPeriod.columnNumber
+    val periods = columns[columnNum] ?: return 0
+    val direction = if (isAppend) Direction.RIGHT else Direction.LEFT
+    var offsetY = startY
+    var columnWidth = 0
+    for (i in startPeriod.positionInColumn until periods.size) {
+      val period = periods[i]
+      val (width, height) = addPeriod(period, direction, offsetX, offsetY, recycler)
+
+      offsetY += height
+      columnWidth = width
+
+      if (i == startPeriod.positionInColumn) anchor.top.put(columnNum, period.adapterPosition)
+      anchor.bottom.put(columnNum, period.adapterPosition)
+      if (offsetY > parentBottom) break
+    }
+    return columnWidth
+  }
+
   private fun fillHorizontalChunk(
     startColumnNum: Int,
     startX: Int,
@@ -384,8 +410,7 @@ class TimetableLayoutManager(
     for (nextColumnNum in range) {
       val startPeriod = calculateStartPeriodInColumn(nextColumnNum, baseY, basePeriod) ?: continue
       val offsetY = baseY + (startPeriod.startUnixMin - basePeriod.startUnixMin) * heightPerMinute
-      val width =
-        fillColumnHorizontally(nextColumnNum, startPeriod.positionInColumn, offsetX, offsetY, isAppend, recycler)
+      val width = fillColumnHorizontally(startPeriod, offsetX, offsetY, isAppend, recycler)
 
       if (isAppend) {
         anchor.rightColumn = nextColumnNum
@@ -399,32 +424,6 @@ class TimetableLayoutManager(
     }
 
     return (offsetX - startX).absoluteValue
-  }
-
-  private fun fillColumnHorizontally(
-    columnNum: Int,
-    startPositionInColumn: Int,
-    offsetX: Int,
-    startY: Int,
-    isAppend: Boolean,
-    recycler: Recycler
-  ): Int {
-    val periods = columns[columnNum] ?: return 0
-    val direction = if (isAppend) Direction.RIGHT else Direction.LEFT
-    var offsetY = startY
-    var columnWidth = 0
-    for (i in startPositionInColumn until periods.size) {
-      val period = periods[i]
-      val (width, height) = addPeriod(period, direction, offsetX, offsetY, recycler)
-
-      offsetY += height
-      columnWidth = width
-
-      if (i == startPositionInColumn) anchor.top.put(columnNum, period.adapterPosition)
-      anchor.bottom.put(columnNum, period.adapterPosition)
-      if (offsetY > parentBottom) break
-    }
-    return columnWidth
   }
 
   private fun fixBottomLayoutGap(recycler: Recycler) {
