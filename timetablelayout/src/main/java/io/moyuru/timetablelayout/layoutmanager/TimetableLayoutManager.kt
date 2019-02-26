@@ -163,7 +163,7 @@ class TimetableLayoutManager(
       val offsetY = parentTop
       var offsetX = parentLeft
       for (columnNumber in 0 until columnCount) {
-        offsetX += fillColumnHorizontally(columns[columnNumber].first(), offsetX, offsetY, true, recycler)
+        offsetX += addColumn(columns[columnNumber].first(), offsetX, offsetY, true, recycler)
         anchor.rightColumn = columnNumber
         if (offsetX > parentRight) break
       }
@@ -211,7 +211,7 @@ class TimetableLayoutManager(
           val left = getDecoratedLeft(view)
           val period = periods.getOrNull(position) ?: return@forEach
           val nextPeriod = columns.get(columnNum).getOrNull(period.positionInColumn + 1) ?: return@forEach
-          fillColumnVertically(nextPeriod, left, bottom, true, recycler)
+          addPeriodsToColumn(nextPeriod, left, bottom, true, recycler)
         }
       }
     } else {
@@ -234,7 +234,7 @@ class TimetableLayoutManager(
           val left = getDecoratedLeft(view)
           val period = periods.getOrNull(position) ?: return@forEach
           val nextPeriod = columns.get(columnNum).getOrNull(period.positionInColumn - 1) ?: return@forEach
-          fillColumnVertically(nextPeriod, left, top, false, recycler)
+          addPeriodsToColumn(nextPeriod, left, top, false, recycler)
         }
       }
     }
@@ -334,7 +334,7 @@ class TimetableLayoutManager(
     return width to height
   }
 
-  private fun fillColumnVertically(
+  private fun addPeriodsToColumn(
     startPeriod: Period,
     offsetX: Int,
     startY: Int,
@@ -361,7 +361,7 @@ class TimetableLayoutManager(
     return (offsetY - startY).absoluteValue
   }
 
-  private fun fillColumnHorizontally(
+  private fun addColumn(
     startPeriod: Period,
     offsetX: Int,
     startY: Int,
@@ -410,7 +410,7 @@ class TimetableLayoutManager(
     for (nextColumnNum in range) {
       val startPeriod = calculateStartPeriodInColumn(nextColumnNum, baseY, basePeriod) ?: continue
       val offsetY = baseY + (startPeriod.startUnixMin - basePeriod.startUnixMin) * heightPerMinute
-      val width = fillColumnHorizontally(startPeriod, offsetX, offsetY, isAppend, recycler)
+      val width = addColumn(startPeriod, offsetX, offsetY, isAppend, recycler)
 
       if (isAppend) {
         anchor.rightColumn = nextColumnNum
@@ -443,7 +443,7 @@ class TimetableLayoutManager(
         val anchorPeriod = periods.getOrNull(position) ?: return@forEach
         val nextPeriod = columns.get(columnNum)
           .getOrNull(anchorPeriod.positionInColumn - 1) ?: return@forEach
-        fillColumnVertically(nextPeriod, left, top, false, recycler)
+        addPeriodsToColumn(nextPeriod, left, top, false, recycler)
       }
     }
   }
