@@ -188,10 +188,10 @@ class TimetableLayoutManager(
   override fun scrollVerticallyBy(dy: Int, recycler: Recycler, state: State): Int {
     if (dy == 0) return 0
 
-    val scrollAmount = calculateVerticallyScrollAmount(dy)
-    if (scrollAmount == 0) return 0
-    offsetChildrenVertical(-scrollAmount)
-    if (scrollAmount > 0) {
+    val actualDy = calculateVerticallyScrollAmount(dy)
+    if (actualDy == 0) return 0
+    offsetChildrenVertical(-actualDy)
+    if (actualDy > 0) {
       // recycle
       anchor.top.forEach { columnNum, position ->
         val view = findViewByPosition(position) ?: return@forEach
@@ -238,7 +238,7 @@ class TimetableLayoutManager(
         }
       }
     }
-    return scrollAmount
+    return actualDy
   }
 
   override fun scrollHorizontallyBy(dx: Int, recycler: Recycler, state: State): Int {
@@ -246,10 +246,10 @@ class TimetableLayoutManager(
 
     val rightView = findRightView() ?: return 0
     val leftView = findLeftView() ?: return 0
-    val scrollAmount = calculateHorizontallyScrollAmount(dx, getDecoratedLeft(leftView), getDecoratedRight(rightView))
-    if (scrollAmount == 0) return 0
-    offsetChildrenHorizontal(-scrollAmount)
-    if (scrollAmount > 0) {
+    val actualDx = calculateHorizontallyScrollAmount(dx, getDecoratedLeft(leftView), getDecoratedRight(rightView))
+    if (actualDx == 0) return 0
+    offsetChildrenHorizontal(-actualDx)
+    if (actualDx > 0) {
       // recycle
       if (getDecoratedRight(leftView) < parentLeft) {
         findViewsByColumn(anchor.leftColumn).forEach { removeAndRecycleView(it, recycler) }
