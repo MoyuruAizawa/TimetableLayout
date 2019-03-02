@@ -193,16 +193,8 @@ class TimetableLayoutManager(
     offsetChildrenVertical(-actualDy)
     if (actualDy > 0) {
       // recycle
-      anchor.top.forEach { columnNum, position ->
-        val view = findViewByPosition(position) ?: return@forEach
-        val bottom = getDecoratedBottom(view)
-        if (bottom < parentTop) {
-          val period = periods.getOrNull(position) ?: return@forEach
-          val nextPeriod = columns.get(columnNum).getOrNull(period.positionInColumn + 1) ?: return@forEach
-          removeAndRecycleView(view, recycler)
-          anchor.top.put(columnNum, nextPeriod.adapterPosition)
-        }
-      }
+      recycleTop(recycler)
+
       // append
       anchor.bottom.forEach { columnNum, position ->
         val view = findViewByPosition(position) ?: return@forEach
@@ -216,16 +208,8 @@ class TimetableLayoutManager(
       }
     } else {
       // recycle
-      anchor.bottom.forEach { columnNum, position ->
-        val view = findViewByPosition(position) ?: return@forEach
-        val top = getDecoratedTop(view)
-        if (top > parentBottom) {
-          val period = periods.getOrNull(position) ?: return@forEach
-          val nextPeriod = columns.get(columnNum).getOrNull(period.positionInColumn - 1) ?: return@forEach
-          removeAndRecycleView(view, recycler)
-          anchor.bottom.put(columnNum, nextPeriod.adapterPosition)
-        }
-      }
+      recycleBottom(recycler)
+
       // prepend
       anchor.top.forEach { columnNum, position ->
         val view = findViewByPosition(position) ?: return@forEach
@@ -424,6 +408,38 @@ class TimetableLayoutManager(
     }
 
     return (offsetX - startX).absoluteValue
+  }
+
+  private fun recycleTop(recycler: Recycler) {
+    (anchor.leftColumn..anchor.rightColumn).forEach { columnNum ->
+      val column = columns[columnNum]
+      val from = periods[anchor.top[columnNum]].positionInColumn
+      val to = min(periods[anchor.bottom[columnNum]].positionInColumn + 1, column.size - 1)
+      val range = column.subList(from, to)
+      range.forEachIndexed { index, period ->
+        val view = findViewByPosition(period.adapterPosition) ?: return
+        if (getDecoratedBottom(view) > parentTop) return
+
+        removeAndRecycleView(view, recycler)
+        anchor.top.put(columnNum, range.getOrNull(index + 1)?.adapterPosition ?: return)
+      }
+    }
+  }
+
+  private fun recycleBottom(recycler: Recycler) {
+    (anchor.leftColumn..anchor.rightColumn).forEach { columnNum ->
+      val column = columns[columnNum]
+      val from = periods[anchor.top[columnNum]].positionInColumn
+      val to = min(periods[anchor.bottom[columnNum]].positionInColumn + 1, column.size - 1)
+      val range = column.subList(from, to).asReversed()
+      range.forEachIndexed { index, period ->
+        val view = findViewByPosition(period.adapterPosition) ?: return
+        if (getDecoratedTop(view) < parentBottom) return
+
+        removeAndRecycleView(view, recycler)
+        anchor.bottom.put(columnNum, range.getOrNull(index + 1)?.adapterPosition ?: return)
+      }
+    }
   }
 
   private fun fixBottomLayoutGap(recycler: Recycler) {
