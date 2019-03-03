@@ -235,10 +235,8 @@ class TimetableLayoutManager(
     offsetChildrenHorizontal(-actualDx)
     if (actualDx > 0) {
       // recycle
-      if (getDecoratedRight(leftView) < parentLeft) {
-        findViewsByColumn(anchor.leftColumn).forEach { removeAndRecycleView(it, recycler) }
-        anchor.leftColumn.getNextColumn().let { anchor.leftColumn = it }
-      }
+      if (getDecoratedRight(leftView) < parentLeft) recycleLeft(recycler)
+
       // append
       val right = getDecoratedRight(rightView)
       if (right < parentRight) {
@@ -250,10 +248,8 @@ class TimetableLayoutManager(
       }
     } else {
       // recycle
-      if (getDecoratedLeft(rightView) > parentRight) {
-        findViewsByColumn(anchor.rightColumn).forEach { removeAndRecycleView(it, recycler) }
-        anchor.rightColumn.getPreviousColumn().let { anchor.rightColumn = it }
-      }
+      if (getDecoratedLeft(rightView) > parentRight) recycleRight(recycler)
+
       // prepend
       val left = getDecoratedLeft(leftView)
       if (left > parentLeft) {
@@ -388,14 +384,13 @@ class TimetableLayoutManager(
       else (startColumnNum downTo 0)
     }
 
-    if (isAppend) anchor.rightColumn = range.last() else anchor.leftColumn = startColumnNum
-
     var offsetX = startX
+    val added = arrayListOf<Int>()
     for (nextColumnNum in range) {
       val startPeriod = calculateStartPeriodInColumn(nextColumnNum, baseY, basePeriod) ?: continue
       val offsetY = baseY + (startPeriod.startUnixMin - basePeriod.startUnixMin) * heightPerMinute
       val width = addColumn(startPeriod, offsetX, offsetY, isAppend, recycler)
-
+      added += nextColumnNum
       if (isAppend) {
         anchor.rightColumn = nextColumnNum
         offsetX += width
@@ -418,7 +413,7 @@ class TimetableLayoutManager(
       val range = column.subList(from, to)
       range.forEachIndexed { index, period ->
         val view = findViewByPosition(period.adapterPosition) ?: return
-        if (getDecoratedBottom(view) > parentTop) return
+        if (getDecoratedBottom(view) >= parentTop) return
 
         removeAndRecycleView(view, recycler)
         anchor.top.put(columnNum, range.getOrNull(index + 1)?.adapterPosition ?: return)
@@ -434,11 +429,39 @@ class TimetableLayoutManager(
       val range = column.subList(from, to).asReversed()
       range.forEachIndexed { index, period ->
         val view = findViewByPosition(period.adapterPosition) ?: return
-        if (getDecoratedTop(view) < parentBottom) return
+        if (getDecoratedTop(view) <= parentBottom) return
 
         removeAndRecycleView(view, recycler)
         anchor.bottom.put(columnNum, range.getOrNull(index + 1)?.adapterPosition ?: return)
       }
+    }
+  }
+
+  private fun recycleLeft(recycler: Recycler) {
+    val removed = arrayListOf<Int>()
+    val range = if (anchor.rightColumn > anchor.leftColumn) (anchor.leftColumn..anchor.rightColumn)
+    else (anchor.leftColumn until columns.size()) + (0..anchor.rightColumn)
+    range.forEach { columnNum ->
+      val views = findViewsByColumn(columnNum)
+      val view = views.firstOrNull() ?: return@forEach
+      if (getDecoratedRight(view) >= parentLeft) return@forEach
+
+      views.forEach { removeAndRecycleView(it, recycler) }
+      removed += columnNum
+      anchor.leftColumn = anchor.leftColumn.getNextColumn()
+    }
+  }
+
+  private fun recycleRight(recycler: Recycler) {
+    val range = if (anchor.leftColumn < anchor.rightColumn) (anchor.rightColumn downTo anchor.leftColumn)
+    else (anchor.rightColumn downTo 0) + ((columns.size() - 1) downTo anchor.leftColumn)
+    range.forEach { columnNum ->
+      val views = findViewsByColumn(columnNum)
+      val view = views.firstOrNull() ?: return@forEach
+      if (getDecoratedLeft(view) <= parentRight) return@forEach
+
+      views.forEach { removeAndRecycleView(it, recycler) }
+      anchor.rightColumn = anchor.rightColumn.getPreviousColumn()
     }
   }
 
