@@ -408,15 +408,15 @@ class TimetableLayoutManager(
   private fun recycleTop(recycler: Recycler) {
     (anchor.leftColumn..anchor.rightColumn).forEach { columnNum ->
       val column = columns[columnNum]
-      val from = periods[anchor.top[columnNum]].positionInColumn
-      val to = min(periods[anchor.bottom[columnNum]].positionInColumn + 1, column.size - 1)
-      val range = column.subList(from, to)
-      range.forEachIndexed { index, period ->
+      val top = periods[anchor.top[columnNum]]
+      val bottom = periods[anchor.bottom[columnNum]]
+      column.subList(top.positionInColumn, bottom.positionInColumn).forEach { period ->
         val view = findViewByPosition(period.adapterPosition) ?: return
         if (getDecoratedBottom(view) >= parentTop) return
 
         removeAndRecycleView(view, recycler)
-        anchor.top.put(columnNum, range.getOrNull(index + 1)?.adapterPosition ?: return)
+        val belowPosition = column[period.positionInColumn + 1].adapterPosition
+        anchor.top.put(columnNum, belowPosition)
       }
     }
   }
@@ -424,15 +424,15 @@ class TimetableLayoutManager(
   private fun recycleBottom(recycler: Recycler) {
     (anchor.leftColumn..anchor.rightColumn).forEach { columnNum ->
       val column = columns[columnNum]
-      val from = periods[anchor.top[columnNum]].positionInColumn
-      val to = min(periods[anchor.bottom[columnNum]].positionInColumn + 1, column.size - 1)
-      val range = column.subList(from, to).asReversed()
-      range.forEachIndexed { index, period ->
+      val top = periods[anchor.top[columnNum]]
+      val bottom = periods[anchor.bottom[columnNum]]
+      column.subList(top.positionInColumn, bottom.positionInColumn).asReversed().forEach { period ->
         val view = findViewByPosition(period.adapterPosition) ?: return
         if (getDecoratedTop(view) <= parentBottom) return
 
         removeAndRecycleView(view, recycler)
-        anchor.bottom.put(columnNum, range.getOrNull(index + 1)?.adapterPosition ?: return)
+        val abovePosition = column[period.positionInColumn - 1].adapterPosition
+        anchor.bottom.put(columnNum, abovePosition)
       }
     }
   }
