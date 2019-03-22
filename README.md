@@ -3,7 +3,7 @@
 ![Platform](https://img.shields.io/badge/Platform-Android-orange.svg)
 ![API](https://img.shields.io/badge/API-16%2B-green.svg)
 ![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)
-[![Download](https://api.bintray.com/packages/lvla/maven/timetablelayout/images/download.svg?version=1.0.0-alpha01)](https://bintray.com/lvla/maven/timetablelayout/1.0.0-alpha01/link)
+[![Download](https://api.bintray.com/packages/lvla/maven/timetablelayout/images/download.svg?version=1.0.0-alpha02)](https://bintray.com/lvla/maven/timetablelayout/1.0.0-alpha02/link)
 [![Build Status](https://app.bitrise.io/app/3b60f49233ad83fe/status.svg?token=80izoZqZH6T38vmGGU602w&branch=master)](https://app.bitrise.io/app/3b60f49233ad83fe)  
 TimetableLayout is a layout manager and item decorations to display the timetable.
 
@@ -13,7 +13,7 @@ TimetableLayout is a layout manager and item decorations to display the timetabl
 # Usage
 **Dependency**
 ```groovy
-implementation 'io.moyuru:timetablelayout:1.0.0-alpha01'
+implementation 'io.moyuru:timetablelayout:1.0.0-alpha02'
 ```
 
 **LayoutManager**
