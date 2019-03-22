@@ -41,7 +41,7 @@ publish {
   userOrg = 'lvla'
   groupId = 'io.moyuru'
   artifactId = 'timetablelayout'
-  publishVersion = "1.0.0-alpha01"
+  publishVersion = "1.0.0-alpha02"
   desc = 'LayoutManager to display the timetable'
   website = 'https://github.com/MoyuruAizawa/TimetableLayout'
 }
