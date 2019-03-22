@@ -61,7 +61,7 @@ class TimetableLayoutManager(
     LEFT, TOP, RIGHT, BOTTOM
   }
 
-  private data class SaveState(val position: Int, val left: Int, val top: Int) : Parcelable {
+  private data class SavedState(val position: Int, val left: Int, val top: Int) : Parcelable {
     constructor(parcel: Parcel) : this(
       parcel.readInt(),
       parcel.readInt(),
@@ -78,12 +78,12 @@ class TimetableLayoutManager(
       return 0
     }
 
-    companion object CREATOR : Parcelable.Creator<SaveState> {
-      override fun createFromParcel(parcel: Parcel): SaveState {
-        return SaveState(parcel)
+    companion object CREATOR : Parcelable.Creator<SavedState> {
+      override fun createFromParcel(parcel: Parcel): SavedState {
+        return SavedState(parcel)
       }
 
-      override fun newArray(size: Int): Array<SaveState?> {
+      override fun newArray(size: Int): Array<SavedState?> {
         return arrayOfNulls(size)
       }
     }
@@ -102,21 +102,21 @@ class TimetableLayoutManager(
   private var lastEndUnixMin = NO_TIME
 
   private var pendingScrollPosition = NO_POSITION
-  private var saveState: SaveState? = null
+  private var savedState: SavedState? = null
 
   override fun generateDefaultLayoutParams(): RecyclerView.LayoutParams {
     return RecyclerView.LayoutParams(RecyclerView.LayoutParams.WRAP_CONTENT, RecyclerView.LayoutParams.WRAP_CONTENT)
   }
 
   override fun onRestoreInstanceState(state: Parcelable?) {
-    saveState = (state as? SaveState)
+    savedState = (state as? SavedState)
   }
 
   override fun onSaveInstanceState(): Parcelable? {
     if (childCount == 0) return null
 
     val view = findFirstVisibleView() ?: return null
-    return SaveState(
+    return SavedState(
       view.adapterPosition,
       getDecoratedLeft(view),
       getDecoratedTop(view)
@@ -129,7 +129,7 @@ class TimetableLayoutManager(
       periods.clear()
       columns.clear()
       anchor.reset()
-      saveState = null
+      savedState = null
       return
     }
 
@@ -147,9 +147,9 @@ class TimetableLayoutManager(
     }
 
     val firstVisibleView = findFirstVisibleView()
-    val restoredOffsetX = saveState?.left ?: firstVisibleView?.let(this::getDecoratedLeft)
-    val restoredOffsetY = saveState?.top ?: firstVisibleView?.let(this::getDecoratedTop)
-    val restoredPeriod = (saveState?.position ?: anchor.top.get(anchor.leftColumn, -1)).let(periods::getOrNull)
+    val restoredOffsetX = savedState?.left ?: firstVisibleView?.let(this::getDecoratedLeft)
+    val restoredOffsetY = savedState?.top ?: firstVisibleView?.let(this::getDecoratedTop)
+    val restoredPeriod = (savedState?.position ?: anchor.top.get(anchor.leftColumn, -1)).let(periods::getOrNull)
 
     anchor.reset()
     detachAndScrapAttachedViews(recycler)
@@ -172,7 +172,7 @@ class TimetableLayoutManager(
 
   override fun onLayoutCompleted(state: State?) {
     pendingScrollPosition = NO_POSITION
-    saveState = null
+    savedState = null
   }
 
   override fun scrollToPosition(position: Int) {
