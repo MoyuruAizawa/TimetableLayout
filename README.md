@@ -1,5 +1,5 @@
 # Deprecated
-**Use Jetpack Compose right now.**  
+Please use the Jetpack Compose implementation [MoyuruAizawa/LazyTimetable](https://github.com/MoyuruAizawa/LazyTimetable).
 
 # TimetableLayout
 
